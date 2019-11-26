@@ -2,4 +2,5 @@
 *.swp
 # Log Files
 *.log
-
+# Pycache
+__pycache__/
