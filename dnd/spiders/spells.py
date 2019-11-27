@@ -13,9 +13,21 @@ class SpellsSpider(CrawlSpider):
         Rule(LinkExtractor(allow=r'/spellcasting/all-spells/a/.+/$'), callback='parse_item', follow=True),
     )
 
+    items_regex = r':\s(.*)$'
+
     def parse_item(self, response):
         item = {}
         item['url'] = response.url
-        item['name'] = response.css('main[role="main"] section article h1::text').get()
-        item['description'] = response.css('.article-content p.description::text').get()
+        item['name'] = response.xpath('//main[@role="main"]/section/article/h1//text()').get()
+        item['description'] = response.xpath('//div[@class="article-content"]/p[1]//text()').get()
+        spell_paragraph = response.xpath('//div[@class="article-content"]/p[2]//text()').re(self.items_regex)
+        if len(spell_paragraph) > 0:
+            item['casting-time'] = spell_paragraph[0]
+        if len(spell_paragraph) > 1:
+            item['range'] = spell_paragraph[1]
+        if len(spell_paragraph) > 2:
+            item['components'] = spell_paragraph[2]
+        if len(spell_paragraph) > 3:
+            item['duration'] = spell_paragraph[3]
+
         return item
