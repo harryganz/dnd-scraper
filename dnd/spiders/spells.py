@@ -19,7 +19,7 @@ class SpellsSpider(CrawlSpider):
         item = {}
         item['url'] = response.url
         item['name'] = response.xpath('//main[@role="main"]/section/article/h1//text()').get()
-        item['description'] = response.xpath('//div[@class="article-content"]/p[1]//text()').get()
+        item['level'] = response.xpath('//div[@class="article-content"]/p[1]//text()').get()
         spell_paragraph = response.xpath('//div[@class="article-content"]/p[2]//text()').re(self.items_regex)
         if len(spell_paragraph) > 0:
             item['casting-time'] = spell_paragraph[0]
@@ -29,5 +29,7 @@ class SpellsSpider(CrawlSpider):
             item['components'] = spell_paragraph[2]
         if len(spell_paragraph) > 3:
             item['duration'] = spell_paragraph[3]
+        item['description'] = "".join(response.xpath('//div[@class="article-content"]/p[3]//text()').getall()) 
+        item['higher-levels'] = "".join(response.xpath('//div[@class="article-content"]/p[4]//text()').getall())
 
         return item
