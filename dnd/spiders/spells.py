@@ -10,7 +10,7 @@ class SpellsSpider(CrawlSpider):
     start_urls = ['http://5esrd.com/spellcasting/all-spells']
 
     rules = (
-        Rule(LinkExtractor(allow=r'/spellcasting/all-spells/a/.+/$'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(allow=r'/spellcasting/all-spells/[a-z]{1}/.+$', canonicalize=True), callback='parse_item', follow=True),
     )
 
     items_regex = r':\s(.*)$'
@@ -19,8 +19,8 @@ class SpellsSpider(CrawlSpider):
         item = {}
         item['url'] = response.url
         item['name'] = response.xpath('//main[@role="main"]/section/article/h1//text()').get()
-        item['level'] = response.xpath('//div[@class="article-content"]/p[1]//text()').get()
-        spell_paragraph = response.xpath('//div[@class="article-content"]/p[2]//text()').re(self.items_regex)
+        item['level'] = response.xpath('//div[@class="article-content"]/*[self::div or self::p][1]//text()').get()
+        spell_paragraph = response.xpath('//div[@class="article-content"]/*[self::div or self::p][2]//text()').re(self.items_regex)
         if len(spell_paragraph) > 0:
             item['casting-time'] = spell_paragraph[0]
         if len(spell_paragraph) > 1:
@@ -29,7 +29,7 @@ class SpellsSpider(CrawlSpider):
             item['components'] = spell_paragraph[2]
         if len(spell_paragraph) > 3:
             item['duration'] = spell_paragraph[3]
-        item['description'] = "".join(response.xpath('//div[@class="article-content"]/p[3]//text()').getall()) 
-        item['higher-levels'] = "".join(response.xpath('//div[@class="article-content"]/p[4]//text()').getall())
+        item['description'] = "".join(response.xpath('//div[@class="article-content"]/*[self::div or self::p][3]//text()').getall()) 
+        item['higher-levels'] = "".join(response.xpath('//div[@class="article-content"]/*[self::div or self::p][4]//text()').getall())
 
         return item
